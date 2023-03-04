@@ -1,0 +1,32 @@
+#simple playbook to clone repo 
+
+---
+- name: simple tasks
+  hosts: slave
+  remote_user: student
+  vars:
+    package:
+     - httpd
+     - git
+  tasks:
+    - name: install httpd and git
+      ansible.builtin.yum:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ package }}"
+    - name: start httpd
+      ansible.builtin.service:
+        name: httpd
+        state: "started"
+        enabled: true
+    - name: making /tmp/mygit/
+      ansible.builtin.file:
+         path: /tmp/mygit/
+         state: "directory"
+    - name: git repo clone
+      ansible.builtin.git:
+         clone: true
+         dest: /tmp/mygit/
+         repo: 'https://github.com/itonix/nodejs_mongo_kube.git'
+
+         
