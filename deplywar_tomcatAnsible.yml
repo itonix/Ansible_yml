@@ -1,0 +1,36 @@
+#yml file senario: war ffile from github repo > clone it to local and build a docker image and run the docker image
+---
+- name: ansible playbook to clone git repo and build a docker image
+  hosts: slave
+  vars:
+   packages:
+    - git
+    - docker
+    
+  tasks: 
+   - name: installing git and docker on remote_user
+     ansible.builtin.yum:
+       name: "{{ item }}"
+       state: latest
+       with_items: "{{ packages }}"
+   - name: starting docker service
+     ansible.builtin.service:
+      name: "{{ packages[1] }}"
+      state: "started"
+   - name: "creating /tmp/local"
+     ansible.builtin.file:
+         path: /tmp/local
+         state: directory
+
+   - name: clone repo to /tmp/local
+     ansible.builtin.git:
+       clone: true
+       dest: /tmp/local/
+       repo: "https://github.com/itonix/AnsibleDockerdemo.git"
+
+   - name: "executing command to run docker build"
+     ansible.builtin.command:
+        chdir: /tmp/local/AnsibleDockerdemo
+        cmd: "docker build -t myapp ."
+  
+   
